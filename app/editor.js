@@ -256,7 +256,7 @@
     }));
     const ts=Object.values(templates).filter(t=>t.family===S.family),sel=$('launch-template'),old=sel.value;
     sel.replaceChildren(...Array.from(select(ts.map(t=>[t.id,t.name])).options));
-    if(ts.some(t=>t.id===old))sel.value=old;renderPreview();
+    sel.value=ts.some(t=>t.id===old)?old:ts[0].id;renderPreview();
   }
   function renderPreview(){
     const t=templates[$('launch-template').value];if(!t)return;

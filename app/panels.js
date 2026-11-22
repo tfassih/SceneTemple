@@ -92,7 +92,7 @@
   }
   function newDocument(){
     const all=allTemplates(S.p),list=Object.values(all),kind=select(Object.values(families).map(f=>[f.id,f.name]),S.t.family),title=input(''),template=select([]),withText=check('Use example text'),message=el('p');
-    function filter(){template.replaceChildren(...Array.from(select(list.filter(t=>t.family===kind.value).map(t=>[t.id,t.name+(templates[t.id]?'':' · project template')])).options));template.onchange();}
+    function filter(){const available=list.filter(t=>t.family===kind.value);template.replaceChildren(...Array.from(select(available.map(t=>[t.id,t.name+(templates[t.id]?'':' · project template')])).options));template.value=available[0].id;template.onchange();}
     template.onchange=()=>{const t=all[template.value];message.textContent=t.description;withText.hidden=!templates[t.id];};kind.onchange=filter;filter();
     modal('Add a script',[label('Script title',title),label('Script type',kind),label('Template',template),message,withText],[
       ['Cancel',close],['Add script',()=>{const d=documentFor(all[template.value],title.value||'Untitled script',!withText.hidden&&withText.firstChild.checked);close();A.mutate(()=>{S.p.documents.push(d);S.p.active=d.id;S.active=d.blocks[0].id;});$('paper-scroll').scrollTop=0;},true]]);

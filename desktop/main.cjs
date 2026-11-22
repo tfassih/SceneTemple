@@ -7,7 +7,7 @@ const {randomUUID,createHash}=require('node:crypto');
 const appFile=path.resolve(__dirname,'../app/index.html'), appURL=pathToFileURL(appFile).href;
 const limit=32*1024*1024;
 const smoke=process.argv.includes('--scenetemple-test') && process.env.SCENETEMPLE_TEST_DIR;
-if(smoke)app.setPath('userData',path.join(smoke,'profile'));
+if(smoke){app.setPath('userData',path.join(smoke,'profile'));app.disableHardwareAcceleration();}
 app.setName('SceneTemple');
 let windowRef,dirty=false,closing=false,ready=false,bound=null,pendingFile=null,pendingDialog=null,fullBeforeFocus=false;
 let recoverQueue=Promise.resolve(), writeQueue=Promise.resolve();
@@ -74,9 +74,9 @@ function queueRecovery(fn){const r=recoverQueue.then(fn);recoverQueue=r.catch(()
 handle('recover-write',raw=>{validRaw(raw);return queueRecovery(()=>atomic(recovery(),raw));});
 handle('recover-read',()=>queueRecovery(async()=>{try{return await fs.readFile(recovery(),'utf8');}catch(e){if(e.code==='ENOENT')return null;throw e;}}));
 handle('recover-clear',()=>queueRecovery(()=>fs.rm(recovery(),{force:true})));
-ipcMain.on('scene:dirty',(e,value)=>{verify(e);dirty=value===true;windowRef.setDocumentEdited(dirty);});
+ipcMain.on('scene:dirty',(e,value)=>{verify(e);dirty=value===true;if(process.platform==='darwin')windowRef.setDocumentEdited(dirty);});
 ipcMain.on('scene:focus',(e,value)=>{verify(e);if(value){fullBeforeFocus=windowRef.isFullScreen();if(!fullBeforeFocus)windowRef.setFullScreen(true);}else if(!fullBeforeFocus&&windowRef.isFullScreen())windowRef.setFullScreen(false);});
-ipcMain.on('scene:ready',e=>{verify(e);ready=true;if(pendingFile)windowRef.webContents.send('scene:file');if(smoke)runSmoke();});
+ipcMain.on('scene:ready',e=>{verify(e);ready=true;windowRef.show();if(pendingFile)windowRef.webContents.send('scene:file');if(smoke)runSmoke();});
 function deliver(file){if(!file||path.extname(file).toLowerCase()!=='.scenetemple')return;pendingFile=file;if(ready)windowRef.webContents.send('scene:file');}
 const cliFile=args=>args.find(a=>!a.startsWith('-')&&path.extname(a).toLowerCase()==='.scenetemple');
 app.on('open-file',(e,f)=>{e.preventDefault();deliver(f);});
@@ -95,7 +95,6 @@ function createWindow(){
     webPreferences:{preload:path.join(__dirname,'preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false,webviewTag:false,spellcheck:false}});
   windowRef.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   windowRef.webContents.on('will-navigate',(e,url)=>{if(url!==appURL)e.preventDefault();});
-  windowRef.on('ready-to-show',()=>windowRef?.show());
   windowRef.on('leave-full-screen',()=>windowRef?.webContents.send('scene:menu','focus-off'));
   windowRef.on('close',e=>{
     if(closing||!dirty||smoke)return;e.preventDefault();

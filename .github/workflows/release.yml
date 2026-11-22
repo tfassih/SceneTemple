@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['VERSION', '.github/workflows/release.yml']
+    paths: ['VERSION', '.github/workflows/release.yml', 'app/**', 'desktop/**', 'tests/**', 'tools/**', 'package.json']
 permissions:
   contents: read
 concurrency:
@@ -82,4 +82,8 @@ jobs:
           cd artifacts
           test "$(find . -maxdepth 1 -type f | wc -l)" -eq 5
           sha256sum * > SHA256SUMS.txt
+          if gh release view "v$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Version $version is already published. Increment VERSION for a new release."
+            exit 0
+          fi
           gh release create "v$version" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "SceneTemple $version" --notes-file ../RELEASE.md --latest *
