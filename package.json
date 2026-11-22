@@ -1,0 +1,15 @@
+{
+  "name": "scenetemple",
+  "productName": "SceneTemple",
+  "version": "1.0.0",
+  "description": "Offline scriptwriting for screen, stage, games, advertising, and social video.",
+  "main": "desktop/main.cjs",
+  "private": true,
+  "scripts": {
+    "prestart": "node tools/prepare.cjs",
+    "start": "electron .",
+    "test": "node --test tests/model.test.cjs",
+    "prepare-assets": "node tools/prepare.cjs"
+  },
+  "devDependencies": {"electron": "43.8.12"}
+}

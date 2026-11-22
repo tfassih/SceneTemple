@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>SceneTemple</title><link rel="icon" href="assets/icon.png"><link rel="stylesheet" href="style.css">
+<script defer src="assets/jszip.min.js"></script><script defer src="assets/font-data.js"></script><script defer src="assets/en-us.js"></script>
+<script defer src="catalog.js"></script><script defer src="model.js"></script><script defer src="layout.js"></script><script defer src="export.js"></script><script defer src="proof.js"></script><script defer src="view.js"></script><script defer src="editor.js"></script><script defer src="panels.js"></script>
+</head><body>
+<div id="home">
+  <header class="homebar"><div class="brand"><img src="assets/icon.png" alt="">SceneTemple</div><div class="header-actions"><button id="recover" hidden>Recover draft</button><button class="quiet" data-action="open"><i data-icon="folder"></i>Open project</button></div></header>
+  <main class="launch">
+    <div class="launch-form">
+      <h1>What are you writing?</h1>
+      <p class="intro">Choose a format to start your script.</p>
+      <div class="family-grid" id="families" role="group" aria-label="Script type"></div>
+      <div class="launch-fields"><label>Template<select id="launch-template"></select></label><label>Project title<input id="launch-title" maxlength="500" placeholder="Untitled project" autocomplete="off"></label></div>
+      <label class="check sample"><input id="sample" type="checkbox">Start with the example text</label>
+      <button class="primary big" id="create">Create project<i data-icon="arrow"></i></button>
+    </div>
+    <section class="preview-panel" aria-label="Template preview"><div class="preview-caption"><span>Template preview</span><i data-icon="file"></i></div><div class="preview-stage"><div id="preview-sheet"></div></div><div class="preview-footer"><h2 id="preview-title"></h2><p id="preview-description"></p></div></section>
+  </main>
+</div>
+<div id="studio" hidden>
+  <header class="appbar"><div class="brand"><img src="assets/icon.png" alt="">SceneTemple</div><span class="short-divider"></span><button id="project-menu" class="project-button"><span id="project-label"></span><i data-icon="down"></i></button><div class="header-actions"><span id="save-state" role="status"></span><button class="quiet" data-action="save" title="Save project (Ctrl/Cmd+S)"><i data-icon="save"></i><span>Save</span></button><button class="primary compact" data-action="export"><i data-icon="export"></i>Export</button></div></header>
+  <div class="workspace">
+    <aside id="navigation"><div class="section-head"><h2>Project</h2><button class="icon-button" data-action="new-document" title="Add script to project" aria-label="Add script to project"><i data-icon="plus"></i></button></div><div id="documents"></div>
+    <div class="section-head outline-head"><h2>Outline</h2><i data-icon="list"></i></div><nav id="outline" aria-label="Document outline"></nav></aside>
+    <main class="desk"><div class="toolbar"><button class="icon-button" data-action="toggle-nav" title="Toggle project and outline" aria-label="Toggle project and outline"><i data-icon="sidebar"></i></button><select id="element-select" aria-label="Current element type"></select><button class="icon-button" data-action="add" title="Insert element" aria-label="Insert element"><i data-icon="plus"></i></button><span class="short-divider"></span><button class="icon-button" data-action="undo" title="Undo" aria-label="Undo"><i data-icon="undo"></i></button><button class="icon-button" data-action="redo" title="Redo" aria-label="Redo"><i data-icon="redo"></i></button><div class="grow"></div><button class="icon-button" data-action="focus" title="Focus mode (F8). Escape to exit." aria-label="Focus mode"><i data-icon="focus"></i></button><button class="icon-button" data-action="toggle-tools" title="Toggle writing tools" aria-label="Toggle writing tools"><i data-icon="tools"></i></button></div>
+      <div id="paper-scroll"><div id="pages"></div></div>
+      <footer class="statusbar"><span id="doc-status"></span><span class="shortcut-hint">Enter · next element&nbsp;&nbsp; Tab · change type</span><label class="zoom-label"><select id="zoom" aria-label="Page zoom"><option value="fit">Fit width</option><option value="0.75">75%</option><option value="0.9">90%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option></select></label></footer>
+    </main>
+    <aside id="inspector"><div class="tabs" role="tablist" aria-label="Writing tools"><button id="tab-library" role="tab" aria-selected="true">Elements</button><button id="tab-proof" role="tab" aria-selected="false">Proofread</button></div><div id="tools-content"></div></aside>
+  </div>
+</div>
+<dialog id="dialog"><form id="modal-form"><div class="modal-head"><h2 id="modal-title"></h2><button type="button" class="icon-button" id="modal-close" aria-label="Close"><i data-icon="close"></i></button></div><div id="modal-body"></div><div id="modal-actions"></div></form></dialog>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<div id="print-root" aria-hidden="true"></div>
+</body></html>

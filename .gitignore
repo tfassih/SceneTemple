@@ -1,0 +1,7 @@
+node_modules/
+dist/
+artifacts/
+app/assets/font-data.js
+.DS_Store
+__pycache__/
+app/assets/en-us.js

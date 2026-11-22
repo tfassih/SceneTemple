@@ -1,0 +1,85 @@
+name: Build and release SceneTemple
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['VERSION', '.github/workflows/release.yml']
+permissions:
+  contents: read
+concurrency:
+  group: scenetemple-release
+  cancel-in-progress: false
+jobs:
+  build:
+    name: Build and test ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, macos-15-intel, macos-15, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: node --test tests/model.test.cjs
+      - if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (!(Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup --yes --no-progress }
+      - run: python tools/package.py
+      - if: runner.os == 'Linux'
+        name: Compare PDF and Word pagination
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends libreoffice-writer poppler-utils
+          python tests/verify_exports.py dist/qa
+      - if: runner.os == 'Linux'
+        run: python tools/package.py --portable
+      - name: Retain native test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-${{ matrix.os }}
+          path: |
+            dist/qa/*.json
+            dist/qa/*.txt
+            dist/qa/*.png
+            dist/qa/*.pdf
+            dist/qa/*.docx
+            dist/qa/*.scenetemple
+            dist/qa/*.pages
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installers-${{ matrix.os }}
+          path: artifacts/*
+          if-no-files-found: error
+          retention-days: 7
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: installers-*
+          path: artifacts
+          merge-multiple: true
+      - name: Publish verified installers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(tr -d '\r\n' < VERSION)"
+          cd artifacts
+          test "$(find . -maxdepth 1 -type f | wc -l)" -eq 5
+          sha256sum * > SHA256SUMS.txt
+          gh release create "v$version" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "SceneTemple $version" --notes-file ../RELEASE.md --latest *
